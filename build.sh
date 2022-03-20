@@ -22,16 +22,10 @@ echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt
 echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
 echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 
-_update_repo() {
-  dpkg-scanpackages . >Packages
-  apt-get -o Acquire::GzipIndexes=false update
-}
-
 apt-get update
 
 tempDir="$(mktemp -d)"
 cd "$tempDir"
 apt-get build-dep -y postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
 apt-get source --compile postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
-_update_repo
 cp -fv "$tempDir"/*.deb "${SELF_DIR}"

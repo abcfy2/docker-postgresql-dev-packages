@@ -33,6 +33,8 @@ jobs:
           - 14
         exclude:
           - debian_version: stretch
+            arch: linux/386
+          - debian_version: stretch
             arch: linux/mips64le
           - debian_version: stretch
             arch: linux/ppc64le
@@ -42,12 +44,12 @@ jobs:
             pg_major: 12
           - debian_version: stretch
             pg_major: 13
-          - debian_version: stretch
-            pg_major: 14
           - debian_version: bullseye
             pg_major: 9.6
           - debian_version: bullseye
             arch: linux/arm64/v8
+          - debian_version: bullseye
+            arch: linux/ppc64le
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU

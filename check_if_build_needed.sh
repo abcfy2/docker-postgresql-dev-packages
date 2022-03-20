@@ -20,11 +20,6 @@ echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt
 echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
 echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 
-_update_repo() {
-  dpkg-scanpackages . >Packages
-  apt-get -o Acquire::GzipIndexes=false update
-}
-
 apt-get update
 pg_madison="$(apt-cache madison postgresql-${PG_MAJOR})"
 if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
@@ -53,7 +48,6 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
       cd "$tempDir"
       apt-get build-dep -y postgresql-common=${ver} pgdg-keyring
       apt-get source --compile postgresql-common=${ver} pgdg-keyring
-      _update_repo
       cp -fv "$tempDir"/*.deb "${SELF_DIR}"
     else
       echo "We already built postgresql-common=${ver} for arch $(uname -m)"
