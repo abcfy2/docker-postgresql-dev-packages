@@ -23,26 +23,15 @@ The built packages hosted on [Gemfury](https://gemfury.com/).
 Add my apt repository to `/etc/apt/sources.list.d/fury.list`:
 
 ```txt
-deb [trusted=yes] http://apt.fury.io/abcfy2/ /
+deb [trusted=yes] https://apt.fury.io/abcfy2/ /
 ```
 
-Use `http` link because you don't need to install `apt-transport-https`.
-
-And you may also add this apt config to `/etc/apt/sources.list.d/`:
-
-```txt
-Acquire::https::Verify-Peer "false";
-Acquire::https::Verify-Host "false";
-```
-
-Because base docker image may not install `ca-certificates`, and you may not want to install it either.
+Note you should install `apt-transport-https` before.
 
 A full example usage script run in docker:
 
 ```sh
-echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
-echo 'Acquire::https::Verify-Peer "false";' >/etc/apt/apt.conf.d/99-disable-verify.conf
-echo 'Acquire::https::Verify-Host "false";' >>/etc/apt/apt.conf.d/99-disable-verify.conf
+echo "deb [trusted=yes] https://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 apt-get update
 # PG_MAJOR and PG_VERSION provide by postgres image
 apt-get install -y postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
