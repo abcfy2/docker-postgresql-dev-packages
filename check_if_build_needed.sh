@@ -30,7 +30,7 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
 
   echo -n >"${SELF_DIR}/should_build_ver"
   for ver in "${pg_src_ver[@]}"; do
-    if ! printf '%s\n' "${fury_built_ver[@]}" | grep -qF -x '${ver}'; then
+    if ! printf '%s\n' "${fury_built_ver[@]}" | grep -qF -x "${ver}"; then
       echo "We should build postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
       echo "${ver}" >>"${SELF_DIR}/should_build_ver"
     fi
