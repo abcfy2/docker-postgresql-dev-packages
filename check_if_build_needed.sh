@@ -1,9 +1,11 @@
 #!/bin/bash -e
 
 export DEBIAN_FRONTEND=noninteractive
+nproc="$(nproc)"
+export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"
 PG_REPO_BASE="http://apt.postgresql.org/pub/repos/apt"
-echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 
+SELF_DIR="$(dirname "$(realpath "${0}")")"
 source /etc/os-release
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   APT_MIRROR='mirror.sjtu.edu.cn'
@@ -11,15 +13,14 @@ if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt"
 fi
 
-apt-get update
-apt-get install -y curl ca-certificates gnupg
+echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
+echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
+echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
 
-curl -Ls --compressed https://www.postgresql.org/media/keys/ACCC4CF8.asc |
-  gpg --dearmor |
-  tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
-
-echo "deb ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
-echo "deb-src ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
+_update_repo() {
+  dpkg-scanpackages . >Packages
+  apt-get -o Acquire::GzipIndexes=false update
+}
 
 apt-get update
 pg_madison="$(apt-cache madison postgresql-${PG_MAJOR})"
@@ -41,8 +42,16 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
   fury_pg_common_built_ver=($(echo "${pg_common_madison}" | grep "http://apt.fury.io/abcfy2" | awk -F '|' '{print $2}' | tr -d ' '))
 
   for ver in "${pg_common_src_ver[@]}"; do
-    if ! printf '%s\n' "${fury_pg_common_built_ver[@]}" | grep -qF -x '${ver}'; then
+    if ! printf '%s\n' "${fury_pg_common_built_ver[@]}" | grep -qF -x "${ver}"; then
       echo "We should build postgresql-common=${ver} for arch $(uname -m)"
+      tempDir="$(mktemp -d)"
+      cd "$tempDir"
+      apt-get build-dep -y postgresql-common=${ver} pgdg-keyring
+      apt-get source --compile postgresql-common=${ver} pgdg-keyring
+      _update_repo
+      cp -fv "$tempDir"/*.deb "${SELF_DIR}"
+    else
+      echo "We already built postgresql-common=${ver} for arch $(uname -m)"
     fi
   done
 fi

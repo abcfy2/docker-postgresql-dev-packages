@@ -20,15 +20,8 @@ EOF
   PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt/"
 fi
 
-apt-get update
-apt-get install -y curl ca-certificates gnupg
-
-curl -Ls --compressed https://www.postgresql.org/media/keys/ACCC4CF8.asc |
-  gpg --dearmor |
-  tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
-
-echo "deb ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
-echo "deb-src ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
+echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
+echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
 
 apt-get update
 

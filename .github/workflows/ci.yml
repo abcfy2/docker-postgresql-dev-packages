@@ -28,17 +28,19 @@ jobs:
           - 14
         exclude:
           - debian_version: stretch
-            arch:
-              - linux/mips64le
-              - linux/ppc64le
-              - linux/s390x
-            pg_major:
-              - 12
-              - 13
-              - 14
-          - debian_version: buster
-            pg_major:
-              - 9.6
+            arch: linux/mips64le
+          - debian_version: stretch
+            arch: linux/ppc64le
+          - debian_version: stretch
+            arch: linux/s390x
+          - debian_version: stretch
+            pg_major: 12
+          - debian_version: stretch
+            pg_major: 13
+          - debian_version: stretch
+            pg_major: 14
+          - debian_version: bullseye
+            pg_major: 9.6
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
@@ -62,3 +64,8 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           PG_MAJOR: ${{ matrix.pg_major }}
+      - name: Push base images if exists
+        run: |
+          find -name '*.deb' -print0 | xargs -0 -I'{}' curl -sF package=@'{}' https://${FURY_PUSH_TOKEN}@push.fury.io/abcfy2/
+        env:
+          FURY_PUSH_TOKEN: ${{ secrets.FURY_PUSH_TOKEN }}
