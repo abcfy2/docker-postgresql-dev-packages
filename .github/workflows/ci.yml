@@ -1,0 +1,64 @@
+name: "CI"
+
+on: [push]
+
+jobs:
+  base:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        debian_version:
+          - stretch
+          - bullseye
+        arch:
+          - linux/386
+          - linux/arm/v5
+          - linux/arm/v7
+          - linux/arm64/v8
+          - linux/mips64le
+          - linux/ppc64le
+          - linux/s390x
+        pg_major:
+          - 9.6
+          - 10
+          - 11
+          - 12
+          - 13
+          - 14
+        exclude:
+          - debian_version: stretch
+            arch:
+              - linux/mips64le
+              - linux/ppc64le
+              - linux/s390x
+            pg_major:
+              - 12
+              - 13
+              - 14
+          - debian_version: buster
+            pg_major:
+              - 9.6
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Determine base image id
+        run: |
+          echo "Try to find image id debian:${DEBIAN_VERSION} matches arch ${ARCH}"
+          IMAGE_ID="$(docker buildx imagetools inspect debian:${DEBIAN_VERSION} | grep -B2 "Platform:\s*${ARCH}" | head -1 | awk '{print $2}')"
+          echo "${IMAGE_ID}"
+          echo "IMAGE_ID=${IMAGE_ID}" >>$GITHUB_ENV
+        env:
+          DEBIAN_VERSION: ${{ matrix.debian_version }}
+          ARCH: ${{ matrix.arch }}
+          PG_MAJOR: ${{ matrix.pg_major }}
+      - name: Determine what should be built
+        run: |
+          docker run --rm -v `pwd`:/build -e PG_MAJOR=${PG_MAJOR} --platform=${ARCH} "${IMAGE_ID}" /build/check_if_build_needed.sh
+        env:
+          ARCH: ${{ matrix.arch }}
+          PG_MAJOR: ${{ matrix.pg_major }}
