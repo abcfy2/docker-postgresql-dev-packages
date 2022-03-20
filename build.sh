@@ -1,7 +1,25 @@
 #!/bin/bash -e
 
+echo "Build postgresql-server-dev-${PG_MAJOR}=${PG_VERSION} for arch $(uname -m)"
+
 export DEBIAN_FRONTEND=noninteractive
+nproc="$(nproc)"
+export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"
 PG_REPO_BASE="http://apt.postgresql.org/pub/repos/apt"
+
+echo 'Acquire::https::Verify-Peer "false";
+Acquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-disable-verify.conf
+
+SELF_DIR="$(dirname "$(realpath "${0}")")"
+source /etc/os-release
+if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
+  APT_MIRROR='mirror.sjtu.edu.cn'
+  sed -i "s/deb.debian.org/${APT_MIRROR}/;s/security.debian.org/${APT_MIRROR}/" /etc/apt/sources.list
+  PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt"
+fi
+
+echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
+echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
 echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 
 _update_repo() {
@@ -9,41 +27,11 @@ _update_repo() {
   apt-get -o Acquire::GzipIndexes=false update
 }
 
-if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  source /etc/os-release
-  cat >/etc/apt/sources.list <<EOF
-deb http://mirror.sjtu.edu.cn/${ID} ${VERSION_CODENAME} main
-deb http://mirror.sjtu.edu.cn/${ID}-security ${VERSION_CODENAME}/updates main
-deb http://mirror.sjtu.edu.cn/${ID} ${VERSION_CODENAME}-updates main
-EOF
-
-  PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt/"
-fi
-
-echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
-echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
-
 apt-get update
 
-nproc="$(nproc)"
-export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"
-
 tempDir="$(mktemp -d)"
-echo "deb [ trusted=yes ] file://$tempDir ./" >/etc/apt/sources.list.d/temp.list
-
-pg_madison="$(apt-cache madison postgresql-14)"
-if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
-  echo "Not found postgresql-14 binary package, so consider we should build packages for this environment."
-
-  pg_common_madison="$(apt-cache madison postgresql-common)"
-  if ! echo "${pg_common_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
-    echo "Not found postgresql-common binary package, so consider we should build it first."
-    cd "$tempDir"
-    apt-get build-dep -y postgresql-common pgdg-keyring
-    apt-get source --compile postgresql-common pgdg-keyring
-    _update_repo
-  fi
-
-  apt-get build-dep -y postgresql-server-dev-14
-  apt-get source --compile postgresql-server-dev-14
-fi
+cd "$tempDir"
+apt-get build-dep -y postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
+apt-get source --compile postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
+_update_repo
+cp -fv "$tempDir"/*.deb "${SELF_DIR}"

@@ -5,6 +5,9 @@ nproc="$(nproc)"
 export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"
 PG_REPO_BASE="http://apt.postgresql.org/pub/repos/apt"
 
+echo 'Acquire::https::Verify-Peer "false";
+Acquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-disable-verify.conf
+
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 source /etc/os-release
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
@@ -13,9 +16,9 @@ if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt"
 fi
 
-echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
 echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
+echo "deb [trusted=yes] http://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 
 _update_repo() {
   dpkg-scanpackages . >Packages
@@ -30,9 +33,11 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
   echo "Find avaliable version in official src repo: ${pg_src_ver[@]}"
   fury_built_ver=($(echo "${pg_madison}" | grep "http://apt.fury.io/abcfy2" | awk -F '|' '{print $2}' | tr -d ' '))
 
+  echo -n >"${SELF_DIR}/should_build_ver"
   for ver in "${pg_src_ver[@]}"; do
     if ! printf '%s\n' "${fury_built_ver[@]}" | grep -qF -x '${ver}'; then
       echo "We should build postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
+      echo "${ver}" >>"${SELF_DIR}/should_build_ver"
     fi
   done
 
