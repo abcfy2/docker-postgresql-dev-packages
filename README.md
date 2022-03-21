@@ -33,8 +33,9 @@ A full example usage script run in docker:
 ```sh
 echo "deb [trusted=yes] https://apt.fury.io/abcfy2/ /" >/etc/apt/sources.list.d/fury.list
 apt-get update
+LIBPQ5_VER="$(dpkg-query --showformat='${Version}' --show libpq5)"
 # PG_MAJOR and PG_VERSION provide by postgres image
-apt-get install -y postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
+apt-get install -y libpq-dev=${LIBPQ5_VER} postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}
 ```
 
 Also an example for Dockerfile can be found in: https://github.com/abcfy2/docker_zhparser/blob/main/Dockerfile.debian
