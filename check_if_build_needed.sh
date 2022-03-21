@@ -24,9 +24,9 @@ echo "deb [trusted=yes] ${MY_OWN_APT} /" >/etc/apt/sources.list.d/fury.list
 apt-get update
 pg_madison="$(apt-cache madison postgresql-${PG_MAJOR})"
 if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
-  echo "Official postgresql not found binary packages for postgresql-${PG_MAJOR}."
+  echo "Official postgresql repository not found binary packages for postgresql-${PG_MAJOR}."
   pg_src_ver=($(echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep Sources | awk -F '|' '{print $2}' | tr -d ' '))
-  echo "Find avaliable version in official src repo: ${pg_src_ver[@]}"
+  echo "Find avaliable version in official source repository: ${pg_src_ver[@]}"
   fury_built_ver=($(echo "${pg_madison}" | grep "${MY_OWN_APT}" | awk -F '|' '{print $2}' | tr -d ' '))
 
   echo -n >"${SELF_DIR}/should_build_ver"
@@ -35,7 +35,7 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
       echo "We should build postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
       echo "${ver}" >>"${SELF_DIR}/should_build_ver"
     else
-      echo "We already built postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
+      echo "We've already built postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
     fi
   done
 
@@ -53,7 +53,7 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
       apt-get source --compile postgresql-common=${ver} pgdg-keyring
       cp -fv "$tempDir"/*.deb "${SELF_DIR}"
     else
-      echo "We already built postgresql-common=${ver} for arch $(uname -m)"
+      echo "We've already built postgresql-common=${ver} for arch $(uname -m)"
     fi
   done
 fi
