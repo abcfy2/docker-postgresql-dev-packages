@@ -32,25 +32,25 @@ jobs:
           - 12
           - 13
           - 14
-        # exclude:
-        #   - debian_version: stretch
-        #     arch: linux/386
-        #   - debian_version: stretch
-        #     arch: linux/mips64le
-        #   - debian_version: stretch
-        #     arch: linux/ppc64le
-        #   - debian_version: stretch
-        #     arch: linux/s390x
-        #   - debian_version: stretch
-        #     pg_major: 12
-        #   - debian_version: stretch
-        #     pg_major: 13
-        #   - debian_version: bullseye
-        #     pg_major: 9.6
-        #   - debian_version: bullseye
-        #     arch: linux/arm64/v8
-        #   - debian_version: bullseye
-        #     arch: linux/ppc64le
+        exclude:
+          - debian_version: stretch
+            arch: linux/386
+          - debian_version: stretch
+            arch: linux/mips64le
+          - debian_version: stretch
+            arch: linux/ppc64le
+          - debian_version: stretch
+            arch: linux/s390x
+          - debian_version: buster
+            arch: linux/386
+          - debian_version: buster
+            arch: linux/arm64/v8
+          - debian_version: buster
+            arch: linux/ppc64le
+          - debian_version: bullseye
+            arch: linux/arm64/v8
+          - debian_version: bullseye
+            arch: linux/ppc64le
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
@@ -69,6 +69,7 @@ jobs:
           ARCH: ${{ matrix.arch }}
           PG_MAJOR: ${{ matrix.pg_major }}
       - name: Determine what should be built
+        if: ${{ env.IMAGE_ID }}
         run: |
           docker run --rm -v `pwd`:/build -e PG_MAJOR=${PG_MAJOR} --platform=${ARCH} "${IMAGE_ID}" /build/check_if_build_needed.sh
           cat should_build_ver || true
@@ -82,6 +83,7 @@ jobs:
         env:
           FURY_PUSH_TOKEN: ${{ secrets.FURY_PUSH_TOKEN }}
       - name: Build dev packages if needed
+        if: ${{ env.IMAGE_ID }}
         run: |
           if [ -s should_build_ver ]; then
             while read pg_version; do
@@ -92,6 +94,7 @@ jobs:
           ARCH: ${{ matrix.arch }}
           PG_MAJOR: ${{ matrix.pg_major }}
       - name: Push dev packages if exists
+        if: ${{ env.IMAGE_ID }}
         run: |
           find -name '*.deb' -print0 | xargs -r -0 -I'{}' curl -sF package=@'{}' https://${FURY_PUSH_TOKEN}@push.fury.io/abcfy2/
           rm -f *.deb
