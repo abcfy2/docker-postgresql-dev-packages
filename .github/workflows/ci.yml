@@ -72,7 +72,12 @@ jobs:
         if: ${{ env.IMAGE_ID }}
         run: |
           docker run --rm -v `pwd`:/build -e PG_MAJOR=${PG_MAJOR} --platform=${ARCH} "${IMAGE_ID}" /build/check_if_build_needed.sh
-          cat should_build_ver || true
+          if [ -s should_build_ver ]; then
+            echo "======================== SUMMARY ========================"
+            echo "We should build these package versions for arch ${ARCH}"
+            cat should_build_ver
+            echo "========================================================="
+          fi
         env:
           ARCH: ${{ matrix.arch }}
           PG_MAJOR: ${{ matrix.pg_major }}
