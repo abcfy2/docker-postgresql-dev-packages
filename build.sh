@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
-echo "Build postgresql-server-dev-${PG_MAJOR}=${PG_VERSION} for arch $(uname -m)"
+ARCH="$(dpkg --print-architecture)"
+echo "Build postgresql-server-dev-${PG_MAJOR}=${PG_VERSION} for arch ${ARCH}"
 
 export DEBIAN_FRONTEND=noninteractive
 nproc="$(nproc)"

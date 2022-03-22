@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+ARCH="$(dpkg --print-architecture)"
 export DEBIAN_FRONTEND=noninteractive
 nproc="$(nproc)"
 export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"
@@ -32,10 +33,10 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
   echo -n >"${SELF_DIR}/should_build_ver"
   for ver in "${pg_src_ver[@]}"; do
     if ! printf '%s\n' "${fury_built_ver[@]}" | grep -qF -x "${ver}"; then
-      echo "We should build postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
+      echo "We should build postgresql-${PG_MAJOR}=${ver} for arch ${ARCH}"
       echo "${ver}" >>"${SELF_DIR}/should_build_ver"
     else
-      echo "We've already built postgresql-${PG_MAJOR}=${ver} for arch $(uname -m)"
+      echo "We've already built postgresql-${PG_MAJOR}=${ver} for arch ${ARCH}"
     fi
   done
 
@@ -46,14 +47,14 @@ if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
 
   for ver in "${pg_common_src_ver[@]}"; do
     if ! printf '%s\n' "${fury_pg_common_built_ver[@]}" | grep -qF -x "${ver}"; then
-      echo "We should build postgresql-common=${ver} for arch $(uname -m)"
+      echo "We should build postgresql-common=${ver} for arch ${ARCH}"
       tempDir="$(mktemp -d)"
       cd "$tempDir"
       apt-get build-dep -y postgresql-common=${ver} pgdg-keyring
       apt-get source --compile postgresql-common=${ver} pgdg-keyring
       cp -fv "$tempDir"/*.deb "${SELF_DIR}"
     else
-      echo "We've already built postgresql-common=${ver} for arch $(uname -m)"
+      echo "We've already built postgresql-common=${ver} for arch ${ARCH}"
     fi
   done
 fi
