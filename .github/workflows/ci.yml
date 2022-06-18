@@ -34,8 +34,6 @@ jobs:
           - 14
         exclude:
           - debian_version: stretch
-            arch: linux/386
-          - debian_version: stretch
             arch: linux/mips64le
           - debian_version: stretch
             arch: linux/ppc64le
