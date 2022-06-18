@@ -40,8 +40,6 @@ jobs:
           - debian_version: stretch
             arch: linux/s390x
           - debian_version: buster
-            arch: linux/386
-          - debian_version: buster
             arch: linux/arm64/v8
           - debian_version: buster
             arch: linux/ppc64le
