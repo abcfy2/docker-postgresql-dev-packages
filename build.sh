@@ -11,6 +11,11 @@ MY_OWN_APT="https://apt.fury.io/abcfy2"
 
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 source /etc/os-release
+# Add deb-src
+if ! grep -q "^\s*deb-src" /etc/apt/sources.list; then
+  sed -i -r 's@^\s*deb(\s*.*)@deb\1\ndeb-src\1@' /etc/apt/sources.list
+fi
+
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   APT_MIRROR='mirror.sjtu.edu.cn'
   sed -i "s/deb.debian.org/${APT_MIRROR}/;s/security.debian.org/${APT_MIRROR}/" /etc/apt/sources.list
@@ -25,6 +30,14 @@ echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc
 echo "deb [trusted=yes] ${MY_OWN_APT} /" >/etc/apt/sources.list.d/fury.list
 
 apt-get update
+
+# fix zlib1g-dev issue
+if ! apt install -y zlib1g-dev; then
+  cd "$(mktemp -d)"
+  apt-get build-dep -y zlib1g-dev
+  apt-get source --compile zlib1g-dev
+  apt install -y ./*.deb
+fi
 
 tempDir="$(mktemp -d)"
 cd "$tempDir"
