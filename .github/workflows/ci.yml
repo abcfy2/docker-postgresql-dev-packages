@@ -14,11 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         debian_version:
-          - stretch
-          - buster
           - bullseye
         arch:
           - linux/386
+          - linux/amd64
           - linux/arm/v5
           - linux/arm/v7
           - linux/arm64/v8
@@ -26,28 +25,12 @@ jobs:
           - linux/ppc64le
           - linux/s390x
         pg_major:
-          - 9.6
           - 10
           - 11
           - 12
           - 13
           - 14
           - 15
-        exclude:
-          - debian_version: stretch
-            arch: linux/mips64le
-          - debian_version: stretch
-            arch: linux/ppc64le
-          - debian_version: stretch
-            arch: linux/s390x
-          - debian_version: buster
-            arch: linux/arm64/v8
-          - debian_version: buster
-            arch: linux/ppc64le
-          - debian_version: bullseye
-            arch: linux/arm64/v8
-          - debian_version: bullseye
-            arch: linux/ppc64le
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
