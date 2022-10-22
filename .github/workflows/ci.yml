@@ -32,6 +32,7 @@ jobs:
           - 12
           - 13
           - 14
+          - 15
         exclude:
           - debian_version: stretch
             arch: linux/mips64le
