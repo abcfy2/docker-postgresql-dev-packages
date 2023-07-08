@@ -16,6 +16,7 @@ jobs:
       matrix:
         debian_version:
           - bullseye
+          - bookworm
         arch:
           - linux/386
           - linux/amd64
