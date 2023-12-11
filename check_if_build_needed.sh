@@ -11,7 +11,11 @@ SELF_DIR="$(dirname "$(realpath "${0}")")"
 source /etc/os-release
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   APT_MIRROR='mirror.sjtu.edu.cn'
-  sed -i "s/deb.debian.org/${APT_MIRROR}/;s/security.debian.org/${APT_MIRROR}/" /etc/apt/sources.list
+  for f in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do
+    if [ -f ${f} ]; then
+      sed -i "s/deb.debian.org/${APT_MIRROR}/;s/security.debian.org/${APT_MIRROR}/" "${f}"
+    fi
+  done
   PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt"
 fi
 
