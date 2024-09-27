@@ -27,7 +27,6 @@ jobs:
           - linux/ppc64le
           - linux/s390x
         pg_major:
-          - 11
           - 12
           - 13
           - 14
