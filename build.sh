@@ -11,7 +11,7 @@ MY_OWN_APT="https://apt.fury.io/abcfy2"
 APT_MIRROR='mirror.sjtu.edu.cn'
 
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt"
+  PG_REPO_BASE="http://mirrors.tencent.com/postgresql/repos/apt"
 fi
 
 SELF_DIR="$(dirname "$(realpath "${0}")")"

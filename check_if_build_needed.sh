@@ -16,7 +16,7 @@ if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
       sed -i "s/deb.debian.org/${APT_MIRROR}/;s/security.debian.org/${APT_MIRROR}/" "${f}"
     fi
   done
-  PG_REPO_BASE="http://repo.huaweicloud.com/postgresql/repos/apt"
+  PG_REPO_BASE="http://mirrors.tencent.com/postgresql/repos/apt"
 fi
 
 apt-get update
