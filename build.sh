@@ -8,7 +8,7 @@ nproc="$(nproc)"
 export DEB_BUILD_OPTIONS="nocheck parallel=$nproc"
 PG_REPO_BASE="http://apt.postgresql.org/pub/repos/apt"
 MY_OWN_APT="https://apt.fury.io/abcfy2"
-APT_MIRROR='mirror.sjtu.edu.cn'
+APT_MIRROR='mirrors.bfsu.edu.cn'
 
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   PG_REPO_BASE="http://mirrors.tencent.com/postgresql/repos/apt"

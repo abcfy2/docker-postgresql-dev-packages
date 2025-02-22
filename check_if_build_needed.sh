@@ -10,7 +10,7 @@ MY_OWN_APT="https://apt.fury.io/abcfy2"
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 source /etc/os-release
 if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  APT_MIRROR='mirror.sjtu.edu.cn'
+  APT_MIRROR='mirrors.bfsu.edu.cn'
   for f in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do
     if [ -f ${f} ]; then
       sed -i "s/deb.debian.org/${APT_MIRROR}/;s/security.debian.org/${APT_MIRROR}/" "${f}"
@@ -19,12 +19,12 @@ if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
   PG_REPO_BASE="http://mirrors.tencent.com/postgresql/repos/apt"
 fi
 
-apt-get update
-apt-get install -y apt-transport-https ca-certificates
-
 echo "deb [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg.list
 echo "deb-src [trusted=yes] ${PG_REPO_BASE} ${VERSION_CODENAME}-pgdg main" >/etc/apt/sources.list.d/pgdg-src.list
 echo "deb [trusted=yes] ${MY_OWN_APT} /" >/etc/apt/sources.list.d/fury.list
+
+apt-get update
+apt-get install -y apt-transport-https ca-certificates
 
 apt-get update
 pg_madison="$(apt-cache madison postgresql-${PG_MAJOR})"
