@@ -39,20 +39,9 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-      - name: Determine base image id
-        run: |
-          echo "Try to find image id debian:${DEBIAN_VERSION} matches arch ${ARCH}"
-          IMAGE_ID="$(docker buildx imagetools inspect debian:${DEBIAN_VERSION} | grep -B2 "Platform:\s*${ARCH}" | head -1 | awk '{print $2}')"
-          echo "${IMAGE_ID}"
-          echo "IMAGE_ID=${IMAGE_ID}" >>$GITHUB_ENV
-        env:
-          DEBIAN_VERSION: ${{ matrix.debian_version }}
-          ARCH: ${{ matrix.arch }}
-          PG_MAJOR: ${{ matrix.pg_major }}
       - name: Determine what should be built
-        if: ${{ env.IMAGE_ID }}
         run: |
-          docker run --rm -v `pwd`:/build -e PG_MAJOR=${PG_MAJOR} --platform=${ARCH} "${IMAGE_ID}" /build/check_if_build_needed.sh
+          docker run --rm -v `pwd`:/build -e PG_MAJOR=${PG_MAJOR} --platform=${ARCH} "debian:${DEBIAN_VERSION}" /build/check_if_build_needed.sh
           if [ -s should_build_ver ]; then
             echo "======================== SUMMARY ========================"
             echo "We should build these package versions for arch ${ARCH}"
@@ -60,6 +49,7 @@ jobs:
             echo "========================================================="
           fi
         env:
+          DEBIAN_VERSION: ${{ matrix.debian_version }}
           ARCH: ${{ matrix.arch }}
           PG_MAJOR: ${{ matrix.pg_major }}
       - name: Push base packages if exists
@@ -69,7 +59,6 @@ jobs:
         env:
           FURY_PUSH_TOKEN: ${{ secrets.FURY_PUSH_TOKEN }}
       - name: Build dev packages if needed
-        if: ${{ env.IMAGE_ID }}
         run: |
           if [ -s should_build_ver ]; then
             while read pg_version; do
@@ -80,7 +69,6 @@ jobs:
           ARCH: ${{ matrix.arch }}
           PG_MAJOR: ${{ matrix.pg_major }}
       - name: Push dev packages if exists
-        if: ${{ env.IMAGE_ID }}
         run: |
           find -name '*.deb' -print0 | xargs -r -0 -I'{}' curl -sF package=@'{}' https://${FURY_PUSH_TOKEN}@push.fury.io/abcfy2/
           rm -f *.deb
