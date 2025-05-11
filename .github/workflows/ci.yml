@@ -41,7 +41,12 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Determine what should be built
         run: |
-          if docker manifest inspect "debian:${DEBIAN_VERSION}" | grep -q "${ARCH}"; then
+          SUPPORTED_PLATFORMS="$(docker manifest inspect "debian:${DEBIAN_VERSION}" | jq -r '.manifests[].platform | select(.architecture != "unknown" and .os != "unknown") | [.os, .architecture, .variant] | map(select(. != null)) | join("/")')"
+
+          echo "Supported platforms for debian:${DEBIAN_VERSION}:"
+          echo "$SUPPORTED_PLATFORMS"
+
+          if echo "$SUPPORTED_PLATFORMS" | grep -q "^${ARCH}$"; then
             echo "Platform ${ARCH} is supported by debian:${DEBIAN_VERSION}, proceeding with build check"
             docker run --rm -v `pwd`:/build -e PG_MAJOR=${PG_MAJOR} --platform=${ARCH} "debian:${DEBIAN_VERSION}" /build/check_if_build_needed.sh
           else
