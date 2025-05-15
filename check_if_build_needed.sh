@@ -28,21 +28,20 @@ apt-get install -y apt-transport-https ca-certificates
 
 apt-get update
 pg_madison="$(apt-cache madison postgresql-${PG_MAJOR})"
-if ! echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources'; then
+pg_src_ver="$(echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep 'Sources' | awk -F '|' '{print $2}' | tr -d ' ' | head -1)"
+pg_bin_ver="$(echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep -v 'Sources' | awk -F '|' '{print $2}' | tr -d ' ' | head -1)"
+if [ "${pg_src_ver}" != "${pg_bin_ver}" ]; then
   echo "Official postgresql repository not found binary packages for postgresql-${PG_MAJOR}."
-  pg_src_ver=($(echo "${pg_madison}" | grep "${PG_REPO_BASE}" | grep Sources | awk -F '|' '{print $2}' | tr -d ' '))
-  echo "Find avaliable version in official source repository: ${pg_src_ver[@]}"
+  echo "Find avaliable version in official source repository: ${pg_src_ver}"
   fury_built_ver=($(echo "${pg_madison}" | grep "${MY_OWN_APT}" | awk -F '|' '{print $2}' | tr -d ' '))
 
   echo -n >"${SELF_DIR}/should_build_ver"
-  for ver in "${pg_src_ver[@]}"; do
-    if ! printf '%s\n' "${fury_built_ver[@]}" | grep -qF -x "${ver}"; then
-      echo "We should build postgresql-${PG_MAJOR}=${ver} for arch ${ARCH}"
-      echo "${ver}" >>"${SELF_DIR}/should_build_ver"
-    else
-      echo "We've already built postgresql-${PG_MAJOR}=${ver} for arch ${ARCH}"
-    fi
-  done
+  if ! printf '%s\n' "${fury_built_ver[@]}" | grep -qF -x "${pg_src_ver}"; then
+    echo "We should build postgresql-${PG_MAJOR}=${pg_src_ver} for arch ${ARCH}"
+    echo "${pg_src_ver}" >>"${SELF_DIR}/should_build_ver"
+  else
+    echo "We've already built postgresql-${PG_MAJOR}=${pg_src_ver} for arch ${ARCH}"
+  fi
 
   pg_common_madison="$(apt-cache madison postgresql-common)"
   pg_common_src_ver=($(echo "${pg_common_madison}" | grep "${PG_REPO_BASE}" | grep Sources | awk -F '|' '{print $2}' | tr -d ' '))
