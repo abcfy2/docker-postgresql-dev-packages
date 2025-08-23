@@ -53,8 +53,8 @@ if [ "${pg_src_ver}" != "${pg_bin_ver}" ]; then
       echo "We should build postgresql-common=${ver} for arch ${ARCH}"
       tempDir="$(mktemp -d)"
       cd "$tempDir"
-      apt-get build-dep -y postgresql-common=${ver} pgdg-keyring
-      apt-get source --compile postgresql-common=${ver} pgdg-keyring
+      apt-get build-dep -y postgresql-common=${ver}
+      apt-get source --compile postgresql-common=${ver}
       cp -fv "$tempDir"/*.deb "${SELF_DIR}"
     else
       echo "We've already built postgresql-common=${ver} for arch ${ARCH}"
