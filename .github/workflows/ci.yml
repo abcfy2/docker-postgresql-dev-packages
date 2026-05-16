@@ -12,7 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
       fail-fast: false
       matrix:
         debian_version:
@@ -36,12 +35,12 @@ jobs:
           - 17
           - 18
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Determine what should be built
         run: |
           SUPPORTED_PLATFORMS="$(docker manifest inspect "debian:${DEBIAN_VERSION}" | jq -r '.manifests[].platform | select(.architecture != "unknown" and .os != "unknown") | [.os, .architecture, .variant] | map(select(. != null)) | join("/")')"
