@@ -10,7 +10,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # ubuntu-26.04 runner ships Docker 29.4.2 which blocks socketcall, leaving QEMU i386 containers without network
+    # (actions/runner-images#14790); pin to 24.04 until it is fixed.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
