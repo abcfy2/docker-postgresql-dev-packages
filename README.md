@@ -10,7 +10,7 @@ Official [postgres docker image](https://hub.docker.com/_/postgres) supports mul
 
 If you want to build your own docker images based on official postgres docker image, you may have to build the missing `-dev` packages yourself, this will waste a lot of time.
 
-In fact you can find official postgres docker image also build the missing packages in its [Dockerfile](https://github.com/docker-library/postgres/blob/e8ebf74e50128123a8d0220b85e357ef2d73a7ec/14/bullseye/Dockerfile#L138).
+In fact you can find official postgres docker image also build the missing packages in its [Dockerfile](https://github.com/docker-library/postgres/blob/431640c75318610961eabb6417cd3ea8140c643f/19/trixie/Dockerfile#L149).
 
 But they does not provide the missing postgresql-dev packages in docker images.
 
