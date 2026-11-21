@@ -31,12 +31,11 @@ jobs:
           - linux/riscv64
           - linux/s390x
         pg_major:
-          - 13
-          - 14
           - 15
           - 16
           - 17
           - 18
+          - 19
     steps:
       - uses: actions/checkout@v6
       - name: Set up QEMU
