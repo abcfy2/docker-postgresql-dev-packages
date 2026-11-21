@@ -10,8 +10,9 @@ on:
 
 jobs:
   build:
-    # ubuntu-26.04 runner ships Docker 29.4.2 which blocks socketcall, leaving QEMU i386 containers without network
-    # (actions/runner-images#14790); pin to 24.04 until it is fixed.
+    # ubuntu-26.04 runner ships Docker 29.4.2 whose seccomp profile blocks the 32-bit socketcall
+    # syscall, leaving native i386 containers without network (actions/runner-images#14790);
+    # pin to 24.04 until the image ships docker-ce >= 29.4.3 (PR #15205 pending).
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
